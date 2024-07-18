@@ -163,11 +163,39 @@ def Matriz_S(Vector, Matriz):
     return Matriz_S1
 
 
-def MatricesPrimas(M, R, A, S):
-    Mp = sp.transpose(S) * M * S
-    Cp = sp.transpose(S) * R * S
-    Kp = sp.transpose(S) * A * S
-    return Mp.evalf(4), Cp.evalf(4), Kp.evalf(4)
+def qzb(impulso, Uo, C):
+    t, s = sp.symbols('t s')
+    qimpulse = impulso.dot(Uo.T)
+
+    denominator = s ** 2 + (Uo.T * C * Uo)[0] * s
+
+    laplace_function = qimpulse / denominator
+
+    # Aplicar la transformada inversa de Laplace
+    beta_t = sp.inverse_laplace_transform(laplace_function, s, t)
+
+    qzbr = beta_t.simplify().evalf(4) * Uo
+    return qzbr
+
+
+# NZP motions
+def NZP(q0, Mm, u0, qdot0, R, A, S):
+    Mp = (sp.transpose(S) * Mm * S).evalf(4)
+    Cp = (sp.transpose(S) * R * S).evalf(4)
+    Kp = (sp.transpose(S) * A * S).evalf(4)
+    q0NRB = (q0 - (u0.T * Mm * q0)[0] * u0).evalf(4)
+    qdot0NRB = qdot0 - (u0.T * Mm * qdot0)[0] * u0
+
+    O = sp.zeros(2, 2)
+    I = sp.eye(2)
+    nueva = O.row_join(I)
+    MMinv = Mp.inv()
+    mm3 = -MMinv * Kp
+    mm4 = -MMinv*Cp
+    partInfe= mm3.row_join(mm4)
+    A=nueva.col_join(partInfe)
+    sp.pprint(A)
+
 
 
 # Example usage
@@ -208,4 +236,9 @@ if __name__ == "__main__":
     S = Matriz_S(normalizado, matriz_evaluada)
     M12 = eliminar_filas_redundantes(jac_eval.evalf(3))
     sp.pprint(Amortiguamiento(M12[0:2, :]).evalf(5).subs(c))
-    Mp, Cp, Kp = MatricesPrimas(matriz_evaluada, Kq, Cq, S)
+
+    # matrices de rigidez amortiguamieno,e inercia
+
+    sp.pprint(normalizado.T)
+    # sp.pprint(qzb(sp.Matrix([[1, 0, 0]]),normalizado,Cq))
+    NZP(sp.Matrix([1, 1, 1]), matriz_evaluada, normalizado, sp.Matrix([0, 0, 0]), Kq, Cq, S)

@@ -191,11 +191,15 @@ def NZP(q0, Mm, u0, qdot0, R, A, S):
     nueva = O.row_join(I)
     MMinv = Mp.inv()
     mm3 = -MMinv * Kp
-    mm4 = -MMinv*Cp
-    partInfe= mm3.row_join(mm4)
-    A=nueva.col_join(partInfe)
-    sp.pprint(A)
+    mm4 = -MMinv * Cp
+    partInfe = mm3.row_join(mm4)
+    A = nueva.col_join(partInfe)
+    B = O.col_join(MMinv)
+    X1 = A.eigenvects()
+    eigen_matrix = sp.Matrix.hstack(*[vects[0] for val, mult, vects in X1])
+    Y1 = (eigen_matrix.inv()).T.evalf(6)
 
+    return Y1, X1
 
 
 # Example usage
@@ -238,7 +242,5 @@ if __name__ == "__main__":
     sp.pprint(Amortiguamiento(M12[0:2, :]).evalf(5).subs(c))
 
     # matrices de rigidez amortiguamieno,e inercia
-
-    sp.pprint(normalizado.T)
     # sp.pprint(qzb(sp.Matrix([[1, 0, 0]]),normalizado,Cq))
     NZP(sp.Matrix([1, 1, 1]), matriz_evaluada, normalizado, sp.Matrix([0, 0, 0]), Kq, Cq, S)

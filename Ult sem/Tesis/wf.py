@@ -179,27 +179,32 @@ def qzb(impulso, Uo, C):
 
 
 # NZP motions
-def NZP(q0, Mm, u0, qdot0, R, A, S):
-    Mp = (sp.transpose(S) * Mm * S).evalf(4)
-    Cp = (sp.transpose(S) * R * S).evalf(4)
-    Kp = (sp.transpose(S) * A * S).evalf(4)
+def NZP(q0, Mm, u0, qdot0, R, A, S1):
+    Mp = (S1.T * Mm * S1).evalf(4)
+    Cp = (S1.T * R * S1).evalf(4)
+    Kp = (S1.T * A * S1).evalf(4)
+
     q0NRB = (q0 - (u0.T * Mm * q0)[0] * u0).evalf(4)
     qdot0NRB = qdot0 - (u0.T * Mm * qdot0)[0] * u0
 
     O = sp.zeros(2, 2)
     I = sp.eye(2)
     nueva = O.row_join(I)
+    sp.pprint(Mp)
     MMinv = Mp.inv()
-    mm3 = -MMinv * Kp
-    mm4 = -MMinv * Cp
+
+    mm3 = (-MMinv) * Kp
+    mm4 = (-MMinv) * Cp
+
     partInfe = mm3.row_join(mm4)
     A = nueva.col_join(partInfe)
+    sp.pprint(A)
     B = O.col_join(MMinv)
     X1 = A.eigenvects()
     eigen_matrix = sp.Matrix.hstack(*[vects[0] for val, mult, vects in X1])
     Y1 = (eigen_matrix.inv()).T.evalf(6)
 
-    return Y1, X1
+    return eigen_matrix
 
 
 # Example usage
@@ -220,27 +225,28 @@ if __name__ == "__main__":
         [sp.symbols('a3'), 0, 1, 0],
     ])
     # condiciones iniciales de los eslabones masas  etc
-    m = [1, 1, 1]
+    m = [20, 10, 5]
     valores = {sp.symbols('Lcom1'): 1 / 2, sp.symbols('Lcom2'): 1 / 2, sp.symbols('Lcom3'): 1 / 2}
     angulos = {sp.symbols('a1'): sp.pi / 4, sp.symbols('a2'): sp.pi / 4, sp.symbols('a3'): sp.pi / 4}
-    k = {sp.symbols('Kx'): 200, sp.symbols('Ky'): 300}
-    c = {sp.symbols('Cx'): 300, sp.symbols('Cy'): 500}
+    k = {sp.symbols('Kx'): 2000, sp.symbols('Ky'): 3000}
+    c = {sp.symbols('Cx'): 15, sp.symbols('Cy'): 15}
 
     d1 = MatrizInercia(m, DH, comDH, a, 1)
     matriz_evaluada = d1.subs(valores).subs(angulos)
     matriz = matriz_jaco(DH, comDH, a, 3)
     jac_eval = sp.Matrix(matriz).subs(valores).subs(angulos)
     # descomentar para ver las matrices de inercia
-    # print("Inertia Matrix:")
-    # sp.pprint(matriz_evaluada.evalf(5))
+    print("Inertia Matrix:")
+    sp.pprint(matriz_evaluada.evalf(5))
     Kq = rigidez(jac_eval[0:2, :]).evalf(5).subs(k)
     # print("AMORTIGUAMIENTO Matrix:")
     Cq = Amortiguamiento(jac_eval[0:2, :]).evalf(5).subs(c)
     normalizado = espacio_N_Normali(Kq)
     S = Matriz_S(normalizado, matriz_evaluada)
     M12 = eliminar_filas_redundantes(jac_eval.evalf(3))
-    sp.pprint(Amortiguamiento(M12[0:2, :]).evalf(5).subs(c))
+    # sp.pprint(Amortiguamiento(M12[0:2, :]).evalf(5).subs(c))
+    sp.pprint(S)
 
     # matrices de rigidez amortiguamieno,e inercia
     # sp.pprint(qzb(sp.Matrix([[1, 0, 0]]),normalizado,Cq))
-    NZP(sp.Matrix([1, 1, 1]), matriz_evaluada, normalizado, sp.Matrix([0, 0, 0]), Kq, Cq, S)
+    sp.pprint(NZP(sp.Matrix([1, 1, 1]), matriz_evaluada, normalizado, sp.Matrix([0, 0, 0]), Kq, Cq, S))

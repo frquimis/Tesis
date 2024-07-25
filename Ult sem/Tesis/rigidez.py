@@ -41,7 +41,6 @@ def eliminar_filas_redundantes(A):
 
         # Convertir las filas no redundantes en una nueva matriz de SymPy
     A_simplificad1 = sp.Matrix(filas_no_redundantes)
-    sp.pprint(A_simplificad1)
 
     # Eliminar filas que consisten únicamente de ceros
     filas_no_nulas = [fila for fila in A_simplificad1.tolist() if any(fila)]
@@ -49,4 +48,5 @@ def eliminar_filas_redundantes(A):
     # Convertir de nuevo a una mat
     # riz de SymPy
     M = sp.Matrix(filas_no_nulas)
+
     return M

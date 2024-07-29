@@ -206,6 +206,9 @@ def NZP(q0, Mm, u0, qdot0, R, A, S1):
 
     return eigen_matrix
 
+def hola ():
+    s =sp.zeros(1,1)
+
 
 # Example usage
 if __name__ == "__main__":

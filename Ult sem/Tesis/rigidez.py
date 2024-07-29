@@ -11,7 +11,7 @@ Cc = sp.Matrix([
 
 
 def rigidez(J):
-    nuva_matriz = J.transpose() * Kc * J
+    nuva_matriz = (J.transpose() * Kc * J)
     return nuva_matriz
 
 
@@ -20,7 +20,6 @@ def Amortiguamiento(J):
     return nuva_matriz
 
 
-import sympy as sp
 
 
 def eliminar_filas_redundantes(A):

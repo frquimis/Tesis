@@ -1,30 +1,21 @@
 import sympy as sp
 from sympy import nsimplify
 
-from Tesis.rigidez import rigidez, Amortiguamiento
 from Tesis.tensor import calcular_tensor_inercia
 
 
+# Funciones importadas (deben estar definidas en rigidez.py y tensor.py)
+# from Tesis.rigidez import rigidez, Amortiguamiento
+# from Tesis.tensor import calcular_tensor_inercia
+
 def denavit_hartenberg_com(a, Lcom):
-    """
-    Create the Denavit-Hartenberg parameter matrix for the center of mass.
-
-    Parameters:
-    a (list): List of link lengths.
-    Lcom (list): List of center of mass distances.
-
-    Returns:
-    comDH (sympy Matrix): Denavit-Hartenberg parameter matrix for the center of mass.
-    """
     comDH = sp.Matrix([
         [0, 0, 0, 0],
         [a[0], 0, Lcom[0], 0],
         [a[1], 0, Lcom[1], 0],
         [a[2], 0, Lcom[2], 0]
     ])
-
     return comDH
-
 
 def dh_transform(theta, d, a, alpha):
     """
@@ -37,7 +28,6 @@ def dh_transform(theta, d, a, alpha):
         [0, 0, 0, 1]
     ])
 
-
 def forward_kinematics_dh(DH, up_to_joint):
     """
     Calculate the forward kinematics for a chain up to a given joint.
@@ -47,7 +37,6 @@ def forward_kinematics_dh(DH, up_to_joint):
         theta, d, a, alpha = DH.row(i)
         T *= dh_transform(theta, d, a, alpha)
     return T
-
 
 def forward_kinematics_dh_com(DH, comDH, rb):
     """
@@ -73,9 +62,7 @@ def forward_kinematics_dh_com(DH, comDH, rb):
     Tx = dh_transform(0, 0, comDH[frame, 2], 0)
 
     Hcom = sp.simplify(H * Rz * Tz * Tx)
-    #sp.pprint(Hcom)
     return Hcom
-
 
 def matriz_jaco(DH, comDH, a, rb):
     Lcom1 = sp.symbols(f'Lcom{rb}')
@@ -111,11 +98,9 @@ def matriz_jaco(DH, comDH, a, rb):
 
         r = sp.Matrix(sp.simplify(Hcom[0:3, 3] - H[0:3, 3]))
 
-        # Jcom[0:3, i - 1] = np.cross(z, r)  # Ajuste de índices para Python (índice base 0)
         Jcom[0:3, i - 1] = z.cross(r)
         Jcom[3:6, i - 1] = z
     return Jcom
-
 
 def MatrizInercia(m, dh, comDh, a, steps):
     rb = len(m)
@@ -127,15 +112,11 @@ def MatrizInercia(m, dh, comDh, a, steps):
         tensor1 = calcular_tensor_inercia(m[j - 1], dh[j - 1, 2])
 
         I = hcom[0:3, 0:3].transpose() * tensor1 * hcom[0:3, 0:3]
-        jcom = matriz_jaco(DH, comDH, a, j)
+        jcom = matriz_jaco(dh, comDh, a, j)
         ele1 = sp.simplify(m[j - 1] * jcom[0:3, :].transpose() * jcom[0:3, :])
         ele2 = sp.simplify(jcom[3:, :].transpose() * I * jcom[3:, :])
         D = D + sp.simplify(ele1 + ele2)
     return nsimplify(D)
-
-
-import sympy as sp
-
 
 def matriz_jaco_planar(DH, a):
     n = len(a)  # Número de coordenadas generalizadas
@@ -143,8 +124,6 @@ def matriz_jaco_planar(DH, a):
     H1 = forward_kinematics_dh(DH, 4)  # Matriz identidad de 4x4 para transformaciones homogéneas
     prev = sp.simplify(H1[0:3, 3])
     for i in range(n):
-
-
         # Vector z de la articulación i (eje z de la articulación anterior)
         z = sp.Matrix([0, 0, 1])  # z es fijo (perpendicular al plano)
 
@@ -152,7 +131,7 @@ def matriz_jaco_planar(DH, a):
         if i == 0:
             p_prev = sp.Matrix([0, 0, 0])
         else:
-            H_prev = forward_kinematics_dh(DH,i+1)
+            H_prev = forward_kinematics_dh(DH, i + 1)
             p_prev = H_prev[0:3, 3]
 
         J[0:3, i] = z.cross(sp.simplify(prev - p_prev))  # Parte traslacional (solo x e y)
@@ -160,16 +139,15 @@ def matriz_jaco_planar(DH, a):
 
     return J
 
-
-#nuevas funciones
-def espacio_N_Normali(matriz_rigidez):
+def espacio_N_Normali(matriz_rigidez, MatrizInercia):
     espacioNulo = matriz_rigidez.nullspace()
     if espacioNulo:
         primer_vector = espacioNulo[0]
-        primer_vector_normalizado = primer_vector / primer_vector.norm()
+        primer_vector_normalizado = primer_vector / sp.sqrt(primer_vector.T*MatrizInercia*primer_vector)
         return primer_vector_normalizado
     else:
         print("La matriz no tiene un espacio nulo no trivial.")
+        return None
 
 if __name__ == "__main__":
     a = [sp.symbols('a1'), sp.symbols('a2'), sp.symbols('a3')]
@@ -187,23 +165,30 @@ if __name__ == "__main__":
         [sp.symbols('a2'), 0, sp.symbols('l2'), 0],
         [sp.symbols('a3'), 0, sp.symbols('l3'), 0],
     ])
+
     # condiciones iniciales de los eslabones masas  etc
-    #valores iniciales
+    # valores iniciales
     m = [20, 10, 5]
-    valores = {sp.symbols('Lcom1'): 0.5 / 2, sp.symbols('Lcom2'):  0.35 / 2, sp.symbols('Lcom3'): 0.3 / 2}
-    angulos = {sp.symbols('a1'):  1.659, sp.symbols('a2'): -1.979, sp.symbols('a3'):1.105}
+    valores = {sp.symbols('Lcom1'): 0.5 / 2, sp.symbols('Lcom2'): 0.35 / 2, sp.symbols('Lcom3'): 0.3 / 2}
+    angulos = {sp.symbols('a1'): 1.659, sp.symbols('a2'): -1.979, sp.symbols('a3'): 1.105}
     k = {sp.symbols('Kx'): 100, sp.symbols('Ky'): 100}
     c = {sp.symbols('Cx'): 15, sp.symbols('Cy'): 15}
     valores1 = {sp.symbols('l1'): 0.5, sp.symbols('l2'): 0.35, sp.symbols('l3'): 0.3}
-    jac=matriz_jaco_planar(DH,a).subs(valores1).subs(angulos).evalf(5)
-    #sp.pprint(matriz_jaco(DH,comDH, a, 3))
-    d1 = MatrizInercia(m, DH, comDH, a, 1).subs(valores).subs(angulos).subs(valores1).evalf(5)
-    Kq = rigidez(jac[0:2, :]).evalf(4).subs(k)
-    Cq = Amortiguamiento(jac[0:2, :]).evalf(3).subs(c)
-    sp.pprint(d1)
-    sp.pprint(Kq)
-    sp.pprint(Cq)
 
+    # jacobiana
+    jac = matriz_jaco_planar(DH, a)
 
-    espacioNulo = Kq.nullspace()
-    sp.pprint(espacioNulo)
+    valcompl = jac[0:2, :].subs(valores1)
+
+    Kc = sp.Matrix([
+        [sp.symbols('Kx'), 0],
+        [0, sp.symbols('Ky')]
+    ])
+    Kq = jac[0:2, :].T * Kc.subs(k) * jac[0:2, :]
+    espacio = Kq.nullspace()
+
+    if espacio:
+        sp.pprint(espacio[0].subs(angulos).subs(valores1))
+    else:
+        print("El espacio nulo no contiene vectores no triviales.")
+

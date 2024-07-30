@@ -11,7 +11,7 @@ Cc = sp.Matrix([
 
 
 def rigidez(J):
-    nuva_matriz = (J.transpose() * Kc * J)
+    nuva_matriz = (J.T * Kc * J)
     return nuva_matriz
 
 

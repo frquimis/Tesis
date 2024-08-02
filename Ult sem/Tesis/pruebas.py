@@ -1,25 +1,41 @@
 import sympy as sp
 
-Kc = sp.Matrix([
-    [61.00, 33.33, 23.33],
-    [33.33, 30.67, 13.71],
-    [23.33, 13.71, 9.000],
+from Tesis.Matriz_Inercia import denavit_hartenberg_com, MatrizInercia, save_variable
+from Tesis.wf import matriz_jaco_planar, rigidez, Amortiguamiento, vector_N
+
+a = [sp.symbols('a1'), sp.symbols('a2'), sp.symbols('a3')]
+
+# centro de masa de los eslabones
+Lcom = [sp.symbols('Lcom1'), sp.symbols('Lcom2'), sp.symbols('Lcom3')]
+
+# parametros DH de centros de masa
+comDH = denavit_hartenberg_com(a, Lcom)
+
+# Example DH parameters for a 3-joint manipulator
+DH = sp.Matrix([
+    [0, 0, 0, 0],
+    [sp.symbols('a1'), 0, sp.symbols('l1'), 0],
+    [sp.symbols('a2'), 0, sp.symbols('l2'), 0],
+    [sp.symbols('a3'), 0, sp.symbols('l3'), 0],
 ])
-valores_propios = Kc.eigenvals()
-# Verificar si la matriz es semidefinida positiva
-es_semidefinida_positiva = all(val >= 0 for val in valores_propios)
+# condiciones iniciales de los eslabones masas  etc
+m = [20, 10, 5]
+valores = {sp.symbols('Lcom1'): 0.5 / 2, sp.symbols('Lcom2'): 0.35 / 2, sp.symbols('Lcom3'): 0.3 / 2}
+angulos = {sp.symbols('a1'): 1.659, sp.symbols('a2'): -1.979, sp.symbols('a3'): 1.105}
+k = {sp.symbols('Kx'): 100, sp.symbols('Ky'): 100}
+c = {sp.symbols('Cx'): 10, sp.symbols('Cy'): 15}
+valores1 = {sp.symbols('l1'): 0.5, sp.symbols('l2'): 0.35, sp.symbols('l3'): 0.3}
 
-# Encontrar el espacio nulo de la matriz K
-espacio_nulo = Kc.nullspace()
+jac = matriz_jaco_planar(DH, a)
+Kq = rigidez(jac[0:2, :]).subs(k)
+Cq = Amortiguamiento(jac[0:2, :]).subs(c).subs(angulos).subs(valores1)
+Kqeva = Kq.subs(angulos).subs(valores1)
+sp.pprint(jac.subs(angulos).subs(valores1))
+d1 = MatrizInercia(m, DH, comDH, a, 1)
+matriz_evaluada = d1.subs(valores).subs(angulos).subs(valores1)
+m1 = vector_N(Kq, angulos, valores1)
+save_variable(m1, 'matriz_nula.pkl')
 
-print(f"Valores propios: {valores_propios}")
-print(f"La matriz es semidefinida positiva: {es_semidefinida_positiva}")
-print(f"Espacio nulo: {espacio_nulo}")
-
-# Si hay un espacio nulo no trivial, normalizar un vector en el espacio nulo
-if espacio_nulo:
-    vector_nulo = espacio_nulo[0]
-    vector_nulo_normalizado = vector_nulo / vector_nulo.norm()
-    print(f"Vector en el espacio nulo (normalizado): {vector_nulo_normalizado}")
-else:
-    print("El espacio nulo es trivial (solo contiene el vector cero).")
+save_variable(Cq, 'amortiguamiento.pkl')
+save_variable(Kqeva, 'rigidez.pkl')
+save_variable(matriz_evaluada, 'inercia.pkl')

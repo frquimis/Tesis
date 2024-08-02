@@ -1,27 +1,5 @@
 import sympy as sp
 
-Kc = sp.Matrix([
-    [sp.symbols('Kx'), 0],
-    [0, sp.symbols('Ky')]
-])
-Cc = sp.Matrix([
-    [sp.symbols('Cx'), 0],
-    [0, sp.symbols('Cy')]
-])
-
-
-def rigidez(J):
-    nuva_matriz = (J.T * Kc * J)
-    return nuva_matriz
-
-
-def Amortiguamiento(J):
-    nuva_matriz = J.transpose() * Cc * J
-    return nuva_matriz
-
-
-
-
 def eliminar_filas_redundantes(A):
     filas_no_redundantes = []
 

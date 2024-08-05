@@ -62,7 +62,7 @@ def NZP(Mm, R, A, S1):
 
 def matrize(valores):
     valores_propios = [val for val, mult, vects in valores]
-    exp_eigenvalues = [sp.exp(val) for val in valores_propios]
+    exp_eigenvalues = [sp.exp(val*sp.symbols('t')) for val in valores_propios]
     matriz = sp.diag(*exp_eigenvalues)
     return matriz
 

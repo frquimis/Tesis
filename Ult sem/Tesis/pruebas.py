@@ -23,7 +23,7 @@ m = [20, 10, 5]
 valores = {sp.symbols('Lcom1'): 0.5 / 2, sp.symbols('Lcom2'): 0.35 / 2, sp.symbols('Lcom3'): 0.3 / 2}
 angulos = {sp.symbols('a1'): 1.659, sp.symbols('a2'): -1.979, sp.symbols('a3'): 1.105}
 k = {sp.symbols('Kx'): 100, sp.symbols('Ky'): 100}
-c = {sp.symbols('Cx'): 10, sp.symbols('Cy'): 15}
+c = {sp.symbols('Cx'): 40.09, sp.symbols('Cy'): 0.1}
 valores1 = {sp.symbols('l1'): 0.5, sp.symbols('l2'): 0.35, sp.symbols('l3'): 0.3}
 
 jac = matriz_jaco_planar(DH, a)

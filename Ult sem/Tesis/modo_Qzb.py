@@ -15,7 +15,7 @@ m2 = load_variable('rigidez.pkl')
 m3 = load_variable('inercia.pkl')
 #print("matrices")
 #output = f"{sp.pretty(m1.evalf(5))}\n{sp.pretty(m2.evalf(5))}\n{sp.pretty(m3.evalf(5))}"
-#print(output)
+sp.pprint(m1)
 #sp.pprint(matriz_nula_cargada)
 #vector normalizado
 normalizado = espacio_N_Normali(matriz_nula_cargada, m3)
@@ -31,13 +31,13 @@ sp.pprint(qzb1)
 qzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in qzb1]
 
 # Evaluar las funciones en un rango de valores para t
-t_values = np.linspace(0, 10, 1000)
+t_values = np.linspace(0, 2, 400)
 qzb1_values = [func(t_values) for func in qzb1_funcs]
 
 # Graficar las componentes de qzb1
 plt.figure(figsize=(10, 6))
 for i, qzb1_val in enumerate(qzb1_values):
-    plt.plot(t_values, qzb1_val, label=f'qzb1_{i+1}')
+    plt.plot(t_values, qzb1_val, label=f'QZB_{i+1}')
 plt.xlabel('t')
 plt.ylabel('Valor')
 plt.title('Componentes de qzb1')

@@ -1,11 +1,13 @@
 import sympy as sp
 
+from Tesis.wf import simplify_expression
+
 
 def Matriz_S(Vector, Matriz):
     q1, q2, q3 = sp.symbols('q1 q2 q3')
     q = sp.Matrix([q1, q2, q3])
     u0T_M = Vector.T * Matriz
-    simplificado = sp.sympify(u0T_M * q).evalf(5)
+    simplificado = sp.sympify(u0T_M * q)
 
     equation = sp.Eq(simplificado[0], 0)
 
@@ -16,23 +18,27 @@ def Matriz_S(Vector, Matriz):
     Matriz_S1[1, 1] = 1
     valorq1 = solution[0].subs({sp.symbols('q2'): 0}) / sp.symbols('q1')
     valorq2 = solution[0].subs({sp.symbols('q1'): 0}) / sp.symbols('q2')
-    Matriz_S1[2, 0] = valorq1.evalf(4)
-    Matriz_S1[2, 1] = valorq2.evalf(4)
+    Matriz_S1[2, 0] = valorq1
+    Matriz_S1[2, 1] = valorq2
     return Matriz_S1
 
 
 def qzb(impulso, Uo, C):
     t, s = sp.symbols('t s')
-    qimpulse = impulso.dot(Uo.T)
+    qimpulse = Uo.T*impulso
 
-    denominator = s ** 2 + (Uo.T * C * Uo)[0] * s
+    x=(Uo.T * C * Uo)[0]
+    x=simplify_expression(x)
 
-    laplace_function = qimpulse / denominator
+    denominator = s ** 2 + x * s
+    sp.pprint(qimpulse[0])
+
+    laplace_function = qimpulse[0] / denominator
 
     # Aplicar la transformada inversa de Laplace
     beta_t = sp.inverse_laplace_transform(laplace_function, s, t)
-
-    qzbr = beta_t.simplify().evalf(4) * Uo
+    sp.pprint(beta_t)
+    qzbr = sp.simplify(beta_t) * Uo
     return qzbr
 
 
@@ -62,7 +68,7 @@ def NZP(Mm, R, A, S1):
 
 def matrize(valores):
     valores_propios = [val for val, mult, vects in valores]
-    exp_eigenvalues = [sp.exp(val*sp.symbols('t')) for val in valores_propios]
+    exp_eigenvalues = [sp.exp(val * sp.symbols('t')) for val in valores_propios]
     matriz = sp.diag(*exp_eigenvalues)
     return matriz
 

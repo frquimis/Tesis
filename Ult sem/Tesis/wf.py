@@ -56,3 +56,16 @@ def rigidez(J):
 def Amortiguamiento(J):
     nuva_matriz = J.transpose() * Cc * J
     return nuva_matriz
+
+
+def simplify_expression(expr, tol=1e-10):
+    """Simplifica una expresión simbólica eliminando términos insignificantes."""
+    simplified_expr = expr.evalf()
+    if abs(simplified_expr) < tol:
+        return 0
+    return simplified_expr
+
+
+def simplify_vector(vector, tol=1e-10):
+    """Simplifica cada componente de un vector simbólico."""
+    return sp.Matrix([simplify_expression(comp, tol) for comp in vector])

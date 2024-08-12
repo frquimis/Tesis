@@ -69,3 +69,8 @@ def simplify_expression(expr, tol=1e-10):
 def simplify_vector(vector, tol=1e-10):
     """Simplifica cada componente de un vector simbólico."""
     return sp.Matrix([simplify_expression(comp, tol) for comp in vector])
+
+
+def funcion_Impulso(fuerza_c, Jacobiano):
+    articular = Jacobiano.T * fuerza_c
+    return articular

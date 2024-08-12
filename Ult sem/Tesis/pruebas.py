@@ -23,18 +23,23 @@ m = [20, 10, 5]
 valores = {sp.symbols('Lcom1'): 0.5 / 2, sp.symbols('Lcom2'): 0.35 / 2, sp.symbols('Lcom3'): 0.3 / 2}
 angulos = {sp.symbols('a1'): 1.659, sp.symbols('a2'): -1.979, sp.symbols('a3'): 1.105}
 k = {sp.symbols('Kx'): 100, sp.symbols('Ky'): 100}
-c = {sp.symbols('Cx'): 40.09, sp.symbols('Cy'): 0.1}
+c = {sp.symbols('Cx'): 18, sp.symbols('Cy'): 0.045}
 valores1 = {sp.symbols('l1'): 0.5, sp.symbols('l2'): 0.35, sp.symbols('l3'): 0.3}
 
 jac = matriz_jaco_planar(DH, a)
+jacEvalf = matriz_jaco_planar(DH, a).subs(angulos).subs(valores1)
+sp.pprint(jacEvalf)
 Kq = rigidez(jac[0:2, :]).subs(k)
 Cq = Amortiguamiento(jac[0:2, :]).subs(c).subs(angulos).subs(valores1)
-Kqeva = Kq.subs(angulos).subs(valores1)
-sp.pprint(jac.subs(angulos).subs(valores1))
+
 d1 = MatrizInercia(m, DH, comDH, a, 1)
 matriz_evaluada = d1.subs(valores).subs(angulos).subs(valores1)
 m1 = vector_N(Kq, angulos, valores1)
+
 save_variable(m1, 'matriz_nula.pkl')
+save_variable(jacEvalf, 'Jacobiano.pkl')
+
+Kqeva = Kq.subs(angulos).subs(valores1)
 
 save_variable(Cq, 'amortiguamiento.pkl')
 save_variable(Kqeva, 'rigidez.pkl')

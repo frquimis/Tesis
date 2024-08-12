@@ -1,45 +1,55 @@
 from Tesis.Matriz_Inercia import load_variable, save_variable
 import sympy as sp
 import numpy as np
-
 import matplotlib.pyplot as plt
-
 from Tesis.metodo import Matriz_S, qzb
-from Tesis.wf import espacio_N_Normali
+from Tesis.wf import espacio_N_Normali, funcion_Impulso
 
-impulso = sp.Matrix([1, 0, 0])
-
+#elementos cargados
 matriz_nula_cargada = load_variable('matriz_nula.pkl')
 m1 = load_variable('amortiguamiento.pkl')
+jaco = load_variable('Jacobiano.pkl')
 m2 = load_variable('rigidez.pkl')
 m3 = load_variable('inercia.pkl')
+
+#creacion de distintos escenarios
+
+F = {sp.symbols('Fx'): 0.5, sp.symbols('Fy'): 15}
+
+Q = sp.Matrix([
+    [sp.symbols('Fx')],
+    [sp.symbols('Fy')]
+])
+
+impulso = funcion_Impulso(Q, jaco[0:2, :]).subs(F)
+
 #print("matrices")
 #output = f"{sp.pretty(m1.evalf(5))}\n{sp.pretty(m2.evalf(5))}\n{sp.pretty(m3.evalf(5))}"
-sp.pprint(m1)
 #sp.pprint(matriz_nula_cargada)
 #vector normalizado
 normalizado = espacio_N_Normali(matriz_nula_cargada, m3)
 #matriz de restriccion
 
 S = Matriz_S(normalizado, m3)
+sp.pprint(S)
 
 qzb1 = qzb(impulso, normalizado, m1)
 save_variable(qzb1, 'cuerpo_rigido.pkl')
 save_variable(S, 'RESTRICCIONES.pkl')
 sp.pprint(qzb1)
+save_variable(impulso, 'funcionImpulso.pkl')
 
 qzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in qzb1]
 
 # Evaluar las funciones en un rango de valores para t
-t_values = np.linspace(0, 2, 400)
+t_values = np.linspace(0, 10, 400)
 qzb1_values = [func(t_values) for func in qzb1_funcs]
 
 # Graficar las componentes de qzb1
 plt.figure(figsize=(10, 6))
 for i, qzb1_val in enumerate(qzb1_values):
-    plt.plot(t_values, qzb1_val, label=f'QZB_{i+1}')
+    plt.plot(t_values, qzb1_val, label=f'QZB_{i + 1}')
 plt.xlabel('t')
-plt.ylabel('Valor')
 plt.title('Componentes de qzb1')
 plt.legend()
 plt.grid(True)

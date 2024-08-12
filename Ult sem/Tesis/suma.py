@@ -2,12 +2,13 @@ import numpy as np
 from matplotlib import pyplot as plt
 import sympy as sp
 
-from Tesis.Matriz_Inercia import load_variable
+from Tesis.Matriz_Inercia import load_variable, save_variable
 
 qzb = load_variable('cuerpo_rigido.pkl')
 qznb = load_variable('cuerpoNoRigido.pkl')
 
 qz=qzb+qznb
+save_variable(qz, 'qt.pkl')
 #sp.pprint(qz)
 qNzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in qz]
 

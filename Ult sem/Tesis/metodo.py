@@ -23,23 +23,17 @@ def Matriz_S(Vector, Matriz):
     return Matriz_S1
 
 
-def qzb(impulso, Uo, C):
-    t, s = sp.symbols('t s')
-    qimpulse = Uo.T*impulso
+def qzb(ics, vics, Uo, M):
+    t = sp.symbols('t')
+    beta_0 = Uo.T * M * ics
+    betadot = Uo.T * M * vics
 
-    x=(Uo.T * C * Uo)[0]
-    x=simplify_expression(x)
+    beta_t = (betadot * t) + beta_0
 
-    denominator = s ** 2 + x * s
-    sp.pprint(qimpulse[0])
-
-    laplace_function = qimpulse[0] / denominator
-
-    # Aplicar la transformada inversa de Laplace
-    beta_t = sp.inverse_laplace_transform(laplace_function, s, t)
-    sp.pprint(beta_t)
-    qzbr = sp.simplify(beta_t) * Uo
-    return qzbr
+    qzbr = Uo * sp.simplify(beta_t)
+    qRB0 = Uo* beta_0
+    qRBdot0 = Uo * betadot
+    return qzbr, qRB0, qRBdot0
 
 
 # NZP motions
@@ -75,5 +69,6 @@ def matrize(valores):
 
 def xt(X1, Y1, valores, B, S, Q):
     matrizval = matrize(valores)
-    x = X1 * matrizval * Y1.T * B * S.T * Q
+    #x = X1 * matrizval * Y1.T * B * S.T * Q
+    x = X1 * matrizval * Y1.T * Q
     return x

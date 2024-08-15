@@ -71,6 +71,6 @@ def simplify_vector(vector, tol=1e-10):
     return sp.Matrix([simplify_expression(comp, tol) for comp in vector])
 
 
-def funcion_Impulso(fuerza_c, Jacobiano):
-    articular = Jacobiano.T * fuerza_c
+def funcion(vx,vy, Jacobiano):
+    articular = Jacobiano.T * sp.Matrix([[vx],[vy]])
     return articular

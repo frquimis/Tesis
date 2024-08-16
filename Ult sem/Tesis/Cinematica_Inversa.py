@@ -1,28 +1,29 @@
 import numpy as np
 import sympy as sp
-import scipy.optimize as opt
 
 
-def Cinematica_Inversa_3R(xd, yd):
-    # Longitudes de los eslabones
-    L1 = 0.5
-    L2 = 0.35
-    L3 = 0.3
+def rrrIK(L1, L2, L3, p):
+    px = p[0]
+    py = p[1]
+    phi = p[2]
 
-    # Definir la función de error basada en la cinemática directa
-    def error_func(thetas):
-        theta1, theta2, theta3 = thetas
-        x = L1 * np.cos(theta1) + L2 * np.cos(theta1 + theta2) + L3 * np.cos(theta1 + theta2 + theta3)
-        y = L1 * np.sin(theta1) + L2 * np.sin(theta1 + theta2) + L3 * np.sin(theta1 + theta2 + theta3)
-        return np.array([x - xd, y - yd])
+    pwx = px - (L3 * np.cos(phi))
+    pwy = py - (L3 * np.sin(phi))
 
-    # Solución inicial para los ángulos
-    initial_guess = np.array([1.659, -1.979, 1.105])
+    c2 = ((pwx ** 2) + (pwy ** 2) - (L1 ** 2) - (L2 ** 2)) / (2 * L1 * L2)
 
-    # Resolvemos el problema de optimización
-    solution = opt.least_squares(error_func, initial_guess)
+    if c2 >= 1 or c2 <= -1:
+        print('not reachable')
+        return None
 
-    theta1, theta2, theta3 = solution.x
-    arreglo = sp.Matrix([[theta1], [theta2], [theta3]])
+    s2 = -np.sqrt(1 - c2 ** 2)
+    theta2 = np.arctan2(s2, c2)
 
-    return arreglo
+    s1 = ((L1 + L2 * c2) * pwy - L2 * s2 * pwx) / (pwx ** 2 + pwy ** 2)
+    c1 = ((L1 + L2 * c2) * pwx + L2 * s2 * pwy) / (pwx ** 2 + pwy ** 2)
+    theta1 = np.arctan2(s1, c1)
+
+    theta3 = phi - theta1 - theta2
+
+    return np.array([theta1, theta2, theta3])
+

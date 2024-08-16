@@ -13,6 +13,7 @@ def Matriz_S(Vector, Matriz):
 
     # Resolver para q3 en términos de q1 y q2
     solution = sp.solve(equation, q3)
+
     Matriz_S1 = sp.zeros(3, 2)
     Matriz_S1[0, 0] = 1
     Matriz_S1[1, 1] = 1
@@ -27,28 +28,32 @@ def qzb(ics, vics, Uo, M):
     t = sp.symbols('t')
     beta_0 = Uo.T * M * ics
     betadot = Uo.T * M * vics
+    sp.pprint(Uo)
 
     beta_t = (betadot * t) + beta_0
 
     qzbr = Uo * sp.simplify(beta_t)
-    qRB0 = Uo* beta_0
+    qRB0 = Uo * beta_0
     qRBdot0 = Uo * betadot
     return qzbr, qRB0, qRBdot0
 
 
 # NZP motions
-def NZP(Mm, R, A, S1):
+def NZP(Mm, Cc, Rc, S1):
     Mp = (S1.T * Mm * S1)
-    Cp = (S1.T * R * S1)
-    Kp = (S1.T * A * S1)
+    Cp = (S1.T * Cc * S1)
+    Kp = (S1.T * Rc * S1)
+
 
     O = sp.zeros(2, 2)
     I = sp.eye(2)
     nueva = O.row_join(I)
     MMinv = Mp.inv()
 
+
     mm3 = (-MMinv) * Kp
     mm4 = (-MMinv) * Cp
+    sp.pprint(mm3)
 
     partInfe = mm3.row_join(mm4)
     A = nueva.col_join(partInfe)

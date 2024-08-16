@@ -35,7 +35,7 @@ def matriz_jaco_planar(DH, a):
 
 
 def espacio_N_Normali(vector, matrizIner):
-    vector_normalizado = vector / ((vector.T * matrizIner * vector)[0])
+    vector_normalizado = vector / sp.sqrt((vector.T * matrizIner * vector)[0])
     return vector_normalizado
 
 

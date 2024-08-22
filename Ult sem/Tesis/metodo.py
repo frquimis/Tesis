@@ -28,7 +28,6 @@ def qzb(ics, vics, Uo, M):
     t = sp.symbols('t')
     beta_0 = Uo.T * M * ics
     betadot = Uo.T * M * vics
-    sp.pprint(Uo)
 
     beta_t = (betadot * t) + beta_0
 
@@ -44,16 +43,13 @@ def NZP(Mm, Cc, Rc, S1):
     Cp = (S1.T * Cc * S1)
     Kp = (S1.T * Rc * S1)
 
-
     O = sp.zeros(2, 2)
     I = sp.eye(2)
     nueva = O.row_join(I)
     MMinv = Mp.inv()
 
-
     mm3 = (-MMinv) * Kp
     mm4 = (-MMinv) * Cp
-    sp.pprint(mm3)
 
     partInfe = mm3.row_join(mm4)
     A = nueva.col_join(partInfe)

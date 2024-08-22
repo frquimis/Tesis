@@ -13,32 +13,27 @@ jaco = load_variable('Jacobiano.pkl')
 m2 = load_variable('rigidez.pkl')
 m3 = load_variable('inercia.pkl')
 
-
 #creacion de distintos escenarios
-qx = 0.15
-qy = 0
+qx = 0.20
+qy = 0.00
 vx = 0
 vy = 0
-q0 = rrrIK(0.5, 0.35,0.3,[(0.685-qx),(0.84+qy),1.23])
-condicio=sp.Matrix(q0)
-print(q0)
+q0 = rrrIK(0.5, 0.35, 0.3, [(0.685 - qx), (0.84 + qy), 1.23])
+condicio = sp.Matrix(q0)
 qdot0 = funcion(vx, vy, jaco[0:2, :])
 normalizado = espacio_N_Normali(matriz_nula_cargada, m3)
 
-qzb1,qrb,qrbdot = qzb(condicio, qdot0, normalizado, m3)
+qzb1, qrb, qrbdot = qzb(condicio, qdot0, normalizado, m3)
 sp.pprint(qzb1)
-QNRB=condicio-qrb
-QNRB_dot=qdot0-qrbdot
+QNRB = condicio - qrb
+QNRB_dot = qdot0 - qrbdot
 
-x0=QNRB[0:2,:].col_join(QNRB_dot[0:2,:])
-sp.pprint(x0)
+x0 = QNRB[0:2, :].col_join(QNRB_dot[0:2, :])
 
 S = Matriz_S(normalizado, m3)
 save_variable(qzb1, 'cuerpo_rigido.pkl')
 save_variable(x0, 'xcero.pkl')
 save_variable(S, 'RESTRICCIONES.pkl')
-sp.pprint(S)
-
 
 '''
 qzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in qzb1]

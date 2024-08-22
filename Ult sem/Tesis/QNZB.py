@@ -1,6 +1,7 @@
 import numpy as np
 import sympy as sp
 from matplotlib import pyplot as plt
+from sympy import Abs
 
 from Tesis.Matriz_Inercia import load_variable, save_variable
 from Tesis.metodo import NZP, xt, matrize
@@ -15,6 +16,10 @@ x1t = xt(derechos, izquierdos, valores, B, Mrestric, qo)
 QNBZ=sp.simplify(Mrestric * x1t[0:2, :])
 QNBZ= sp.simplify(sp.simplify(QNBZ))
 
+eigenvalores = [val[0] for val in valores]
+modulos = [Abs(val) for val in eigenvalores]
+sp.pprint(modulos)
+
 save_variable(QNBZ, 'cuerpoNoRigido.pkl')
 
 
@@ -22,7 +27,7 @@ save_variable(QNBZ, 'cuerpoNoRigido.pkl')
 qNzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in QNBZ]
 
 # Evaluar las funciones en un rango de valores para t
-t_values = np.linspace(0, 13, 400)
+t_values = np.linspace(0, 9, 400)
 qzb1_values = [func(t_values) for func in qNzb1_funcs]
 
 # Graficar las componentes de qzb1

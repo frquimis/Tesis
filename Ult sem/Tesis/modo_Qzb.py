@@ -1,4 +1,4 @@
-from Tesis.Cinematica_Inversa import rrrIK
+from Tesis.Cinematica_Inversa import rrrIK, forward_kinematics_3R
 from Tesis.Matriz_Inercia import load_variable, save_variable
 import sympy as sp
 import numpy as np
@@ -13,13 +13,19 @@ jaco = load_variable('Jacobiano.pkl')
 m2 = load_variable('rigidez.pkl')
 m3 = load_variable('inercia.pkl')
 
+longitudes = {sp.symbols('l1'): 0.4, sp.symbols('l2'): 0.25, sp.symbols('l3'): 0.2}
+angulos = {sp.symbols('a1'): 0.529, sp.symbols('a2'): 0.6, sp.symbols('a3'): 0.105}
+
 #creacion de distintos escenarios
-qx = 0.20
-qy = 0.00
+qx = 0.012
+qy = 0
 vx = 0
 vy = 0
-q0 = rrrIK(0.5, 0.35, 0.3, [(0.685 - qx), (0.84 + qy), 1.23])
+x, y, phi = forward_kinematics_3R(0.529, 0.6, 0.105, 0.4, 0.25, 0.2)
+q0 = rrrIK(0.4, 0.25, 0.2, [(x - qx), (y + qy), phi])
+
 condicio = sp.Matrix(q0)
+sp.pprint(condicio)
 qdot0 = funcion(vx, vy, jaco[0:2, :])
 normalizado = espacio_N_Normali(matriz_nula_cargada, m3)
 

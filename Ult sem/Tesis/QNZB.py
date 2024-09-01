@@ -17,6 +17,7 @@ QNBZ=sp.simplify(Mrestric * x1t[0:2, :])
 QNBZ= sp.simplify(sp.simplify(QNBZ))
 
 eigenvalores = [val[0] for val in valores]
+sp.pprint(eigenvalores)
 modulos = [Abs(val) for val in eigenvalores]
 sp.pprint(modulos)
 
@@ -27,19 +28,20 @@ save_variable(QNBZ, 'cuerpoNoRigido.pkl')
 qNzb1_funcs = [sp.lambdify(sp.symbols('t'), comp, 'numpy') for comp in QNBZ]
 
 # Evaluar las funciones en un rango de valores para t
-t_values = np.linspace(0, 9, 400)
+t_values = np.linspace(0, 8, 400)
 qzb1_values = [func(t_values) for func in qNzb1_funcs]
 
 # Graficar las componentes de qzb1
 plt.figure(figsize=(10, 6))
 for i, qzb1_val in enumerate(qzb1_values):
-    plt.plot(t_values, qzb1_val, label=f'QNBZ_{i + 1}')
-plt.xlabel('t')
-plt.ylabel('Valor')
-plt.title('Componentes de QNBZ')
+    plt.plot(t_values, qzb1_val, label=f'QNZP_{i + 1}')
+plt.xlabel('t(s)')
+plt.ylabel('Amplitud')
+plt.title('Componentes de QNZP')
 plt.legend()
 plt.grid(True)
 plt.show()
+
 '''QNBZ = sp.simplify(Mrestric * x1t[0:2, :])
 QNBZ = sp.simplify(QNBZ.evalf(6))
 save_variable(QNBZ, 'cuerpoNoRigido.pkl')

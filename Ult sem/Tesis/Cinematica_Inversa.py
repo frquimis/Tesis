@@ -27,3 +27,21 @@ def rrrIK(L1, L2, L3, p):
 
     return np.array([theta1, theta2, theta3])
 
+
+def forward_kinematics_3R(theta1, theta2, theta3, l1, l2, l3):
+    # Posición del primer eslabón
+    x1 = l1 * np.cos(theta1)
+    y1 = l1 * np.sin(theta1)
+
+    # Posición del segundo eslabón
+    x2 = x1 + l2 * np.cos(theta1 + theta2)
+    y2 = y1 + l2 * np.sin(theta1 + theta2)
+
+    # Posición del efector final
+    x3 = x2 + l3 * np.cos(theta1 + theta2 + theta3)
+    y3 = y2 + l3 * np.sin(theta1 + theta2 + theta3)
+
+    # Ángulo de orientación del efector final
+    phi = theta1 + theta2 + theta3
+
+    return x3, y3, phi
